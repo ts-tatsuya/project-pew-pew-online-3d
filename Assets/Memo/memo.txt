@@ -1,0 +1,10 @@
+
+
+if 0
+border = 0.75 & -0.75
+
+
+
+if vertical -1
+and
+horizontal ABS >  vertical ABS
