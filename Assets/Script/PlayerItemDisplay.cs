@@ -8,4 +8,5 @@ public class PlayerItemDisplay : MonoBehaviour
 
     public Text text;
     public Image isReadyIndicator;
+    public Text avatarUsedName;
 }

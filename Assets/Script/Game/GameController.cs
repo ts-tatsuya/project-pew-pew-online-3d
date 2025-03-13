@@ -6,12 +6,16 @@ using Photon.Pun;
 public class GameController : MonoBehaviourPunCallbacks
 {
 
+
     public bool isGameOver;
     public int winnerId;
     public Dictionary<int, GameObject> players = new Dictionary<int, GameObject>();
+    public List<GameObject> playerGameobject = new List<GameObject>();
     [Header("Necessary Gameobject")]
     [SerializeField]
     private GameObject gameOverPopUp;
+    [SerializeField]
+    private GameObject gameResult;
 
     private bool gameStarted;
 
@@ -19,7 +23,7 @@ public class GameController : MonoBehaviourPunCallbacks
     void Start()
     {
         gameStarted = false;
-        photonView.RPC("RPC_RegisterPlayer", RpcTarget.AllBuffered, 1, gameObject);
+        //photonView.RPC("RPC_RegisterPlayer", RpcTarget.AllBuffered, 1, GameManager.SlotNumber);
     }
 
     // Update is called once per frame
@@ -45,11 +49,13 @@ public class GameController : MonoBehaviourPunCallbacks
         photonView.RPC("RPC_UnregisterPlayer", RpcTarget.AllBuffered, actorNumber);
     }
 
-    public void RegisterPlayer(int actorNumber, GameObject obj)
+    public void RegisterPlayer(int actorNumber)
     {
         Debug.Log("PLAYER REGISTERED");
-        players.Add(actorNumber, obj);
-        GameManager.PlayerAlive++;
+        // players.Add(actorNumber, obj);
+        // playerGameobject.Add(obj);
+        // GameManager.PlayerAlive++;
+        photonView.RPC(nameof(RPC_RegisterPlayer), RpcTarget.AllBuffered, actorNumber);
     }
 
     #endregion
@@ -66,10 +72,21 @@ public class GameController : MonoBehaviourPunCallbacks
     }
     #region RPC
     [PunRPC]
-    private void RPC_RegisterPlayer(int actorNumber, GameObject obj)
+    private void RPC_RegisterPlayer(int actorNumber)
     {
         Debug.Log("PLAYER REGISTERED");
+        GameObject obj = new GameObject();
+        PlayerController[] tempPlayerControllers = FindObjectsOfType<PlayerController>();
+        for (int i = 0; i < tempPlayerControllers.Length; i++)
+        {
+            if (tempPlayerControllers[i].photonView.OwnerActorNr == actorNumber)
+            {
+                obj = tempPlayerControllers[i].gameObject;
+                break;
+            }
+        }
         players.Add(actorNumber, obj);
+        playerGameobject.Add(obj);
         GameManager.PlayerAlive++;
     }
 
@@ -89,10 +106,11 @@ public class GameController : MonoBehaviourPunCallbacks
     private bool WinCond_LastManStanding()
     {
         Debug.Log(players.Count);
-        if (GameManager.PlayerAlive == 1)
+        if (GameManager.PlayerAlive == 1 && gameStarted == true)
         {
             gameStarted = false;
             isGameOver = true;
+            gameResult.SetActive(true);
             return true;
         }
         return false;
@@ -101,17 +119,25 @@ public class GameController : MonoBehaviourPunCallbacks
     #endregion
 
 
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        if (stream.IsWriting)
-        {
-            stream.SendNext(players.Keys);
-            stream.SendNext(players.Values);
-        }
-        else if (stream.IsReading)
-        {
-
-        }
-    }
+    // public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    // {
+    //     if (stream.IsWriting)
+    //     {
+    //         stream.SendNext(players.Keys);
+    //         stream.SendNext(players.Values);
+    //         stream.SendNext(playerGameobject.ToArray());
+    //     }
+    //     else if (stream.IsReading)
+    //     {
+    //         int key = (int)stream.ReceiveNext();
+    //         GameObject value = (GameObject)stream.ReceiveNext();
+    //         Debug.Log(value.name);
+    //         GameObject[] tempObjects = (GameObject[])stream.ReceiveNext();
+    //         foreach (GameObject obj in tempObjects)
+    //         {
+    //             playerGameobject.Add(obj);
+    //         }
+    //     }
+    // }
 
 }

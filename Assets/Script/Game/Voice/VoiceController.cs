@@ -15,11 +15,18 @@ public class VoiceController : MonoBehaviour
     void Start()
     {
         voiceView = GameManager.VoiceView;
+        //PunVoiceClient.Instance.ConnectAndJoinRoom();
+        recorder = GameObject.FindObjectOfType<Recorder>();
+        recorder.TransmitEnabled = false;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (voiceView == null && GameManager.VoiceView != null)
+        {
+            voiceView = GameManager.VoiceView;
+        }
         VoiceHold();
     }
 

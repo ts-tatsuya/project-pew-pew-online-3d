@@ -77,11 +77,16 @@ public class PlayerSpawnerController : MonoBehaviourPunCallbacks, IPunObservable
         if (isSpawnedMine == false)
         {
             Transform spawnPointBeingUsed = spawnPointList[playerSpawnPoint[GameManager.SlotNumber] - 1];
-            GameObject spawnedPlayer = PhotonNetwork.Instantiate("Prefab/Player/unitychan", spawnPointBeingUsed.position, spawnPointBeingUsed.rotation);
+            int[] avatarIdData = (int[])PhotonNetwork.CurrentRoom.CustomProperties["playerAvatarIdData"];
+            GameObject spawnedPlayer = PhotonNetwork.Instantiate(
+                GameMetaDataManager.avatarAssetPath[avatarIdData[GameManager.SlotNumber]],
+                spawnPointBeingUsed.position,
+                spawnPointBeingUsed.rotation
+                );
             isSpawnedMine = true;
             Camera.main.GetComponent<CameraController>().player = spawnedPlayer.transform;
             GameManager.VoiceView = spawnedPlayer.GetComponent<PhotonVoiceView>();
-            gameController.RegisterPlayer(PhotonNetwork.LocalPlayer.ActorNumber, spawnedPlayer);
+            gameController.RegisterPlayer(PhotonNetwork.LocalPlayer.ActorNumber);
         }
 
 

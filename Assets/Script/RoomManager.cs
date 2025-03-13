@@ -21,7 +21,9 @@ public class RoomManager : MonoBehaviourPunCallbacks
     [SerializeField]
     private Button _startReadyButton;
     [SerializeField]
-    private Button _LeaveButton;
+    private Button _leaveButton;
+    [SerializeField]
+    private Button _avatarSelectionButton;
     [Header("View")]
     [SerializeField]
     private GameObject _mainMenu;
@@ -29,6 +31,8 @@ public class RoomManager : MonoBehaviourPunCallbacks
     private GameObject _joinRoomMenu;
     [SerializeField]
     private GameObject _hostLeaveRoomNotification;
+    [SerializeField]
+    private GameObject _avatarSelectionMenu;
     private int _roomPlayerId;
     private Color _startReadyButtonDefaultColor;
     // private Dictionary<int, Player> _listPlayer;
@@ -38,11 +42,18 @@ public class RoomManager : MonoBehaviourPunCallbacks
     [Header("PlayerReadyData Visual")]
     [SerializeField]
     private bool[] _playerReadyData;
+    [Header("PlayerAvatarIdData Visual")]
+    [SerializeField]
+    private int[] _avatarIdData;
     void Start()
     {
         _startReadyButton.onClick.AddListener(() => StartReadyButton());
-        _LeaveButton.onClick.AddListener(() => LeaveRoomButton());
+        _leaveButton.onClick.AddListener(() => LeaveRoomButton());
         _startReadyButtonDefaultColor = _startReadyButton.GetComponent<Image>().color;
+        _avatarSelectionButton.onClick.AddListener(() =>
+        {
+            _avatarSelectionMenu.SetActive(true);
+        });
 
 
     }
@@ -149,6 +160,16 @@ public class RoomManager : MonoBehaviourPunCallbacks
             UpdatePlayerList();
         }
 
+    }
+    public void AvatarChangeButton()
+    {
+        Debug.Log(GameManager.PlayerAvatarId);
+        _avatarIdData = (int[])PhotonNetwork.CurrentRoom.CustomProperties["playerAvatarIdData"];
+        _avatarIdData[playerListTemp.IndexOf(PhotonNetwork.LocalPlayer.ActorNumber.ToString())] = GameManager.PlayerAvatarId;
+        ExitGames.Client.Photon.Hashtable roomHash = PhotonNetwork.CurrentRoom.CustomProperties;
+        roomHash["playerAvatarIdData"] = _avatarIdData;
+        PhotonNetwork.CurrentRoom.SetCustomProperties(roomHash);
+        UpdatePlayerList();
     }
     private void CheckPlayerReadyCount()
     {
@@ -340,6 +361,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
         {
             Player tempPlayer = PhotonNetwork.CurrentRoom.GetPlayer(int.Parse(playerId));
             _playerReadyData = (bool[])PhotonNetwork.CurrentRoom.CustomProperties["playerReadyData"];
+            _avatarIdData = (int[])PhotonNetwork.CurrentRoom.CustomProperties["playerAvatarIdData"];
             _playerInfoItem.Add(Instantiate(_playerItemPrefab));
             _playerInfoItem[_playerInfoItem.Count - 1].GetComponent<PlayerItemDisplay>().text.text = tempPlayer.NickName;
             _playerInfoItem[_playerInfoItem.Count - 1].transform.SetParent(_playerListViewportContent.transform);
@@ -354,6 +376,9 @@ public class RoomManager : MonoBehaviourPunCallbacks
                     _playerInfoItem[_playerInfoItem.Count - 1].GetComponent<PlayerItemDisplay>().isReadyIndicator.color = Color.red;
                     break;
             }
+            _playerInfoItem[_playerInfoItem.Count - 1].GetComponent<PlayerItemDisplay>().avatarUsedName.text =
+            "As: " +
+            GameMetaDataManager.avatarNames[_avatarIdData[playerListTemp.IndexOf(tempPlayer.ActorNumber.ToString())]];
         }
     }
 }
