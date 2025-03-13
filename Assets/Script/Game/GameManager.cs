@@ -10,4 +10,5 @@ public static class GameManager
     public static bool IsUIFocused { get; set; }
     public static PhotonVoiceView VoiceView { get; set; }
     public static int PlayerAlive { get; set; }
+    public static int PlayerAvatarId { get; set; }
 }

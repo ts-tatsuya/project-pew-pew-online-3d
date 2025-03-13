@@ -49,6 +49,7 @@ public class CreateRoomManager : MonoBehaviourPunCallbacks
         };
         roomOption.CustomRoomProperties = new ExitGames.Client.Photon.Hashtable();
         roomOption.CustomRoomProperties.Add("playerReadyData", new bool[4] { true, false, false, false });
+        roomOption.CustomRoomProperties.Add("playerAvatarIdData", new int[4] { 0, 0, 0, 0 });
         roomOption.CustomRoomProperties.Add("CreatorId", PhotonNetwork.LocalPlayer.UserId);
         if (_roomNameInputField.text.Length > 0)
         {
